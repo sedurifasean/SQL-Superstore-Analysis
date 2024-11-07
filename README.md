@@ -65,5 +65,3 @@ The "Superstore" dataset includes transaction-level data from a retail business,
 ### 10. **Reduced Operational Costs by Streamlining Product Returns**
    - **Finding**: A few product categories had high return rates, which increased operational costs and impacted profitability.
    - **Suggestion**: Analyze and address root causes of high returns, such as quality improvements, clear product descriptions, or return policy adjustments, to minimize return rates and reduce costs.
-
-These findings, with actionable recommendations, highlight your ability to leverage data insights to drive business strategy, optimize operations, and enhance customer satisfaction. Including these in your resume will underscore your strategic and data-driven approach to solving complex business problems.
