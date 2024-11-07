@@ -1,0 +1,177 @@
+1. BASIC DATA EXPLORATION
+
+-- Count total records in the dataset
+SELECT COUNT(*) AS total_records
+FROM superstore;
+
+-- View all columns and the first 10 rows of the data
+SELECT *
+FROM superstore
+LIMIT 10;
+
+2. DATA CLEANING 
+
+-- Identify missing values in Postal Code
+SELECT *
+FROM superstore
+WHERE "Postal Code" IS NULL;
+
+-- Fill missing Postal Code values with a placeholder, -1
+UPDATE superstore
+SET "Postal Code" = -1
+WHERE "Postal Code" IS NULL;
+
+-- Verify if there are any remaining null values
+SELECT COUNT(*)
+FROM superstore
+WHERE "Postal Code" IS NULL;
+
+3. AGGREGATION 
+
+-- Total sales by category
+SELECT Category, SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY Category
+ORDER BY total_sales DESC;
+
+-- Total sales by region
+SELECT Region, SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY Region
+ORDER BY total_sales DESC;
+
+-- Top 5 states by total sales
+SELECT State, SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY State
+ORDER BY total_sales DESC
+LIMIT 5;
+
+4. CUSTOMER INSIGHTS 
+
+-- Top 5 customers by total sales
+SELECT "Customer Name", "Customer ID", SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY "Customer Name", "Customer ID"
+ORDER BY total_sales DESC
+LIMIT 5;
+
+-- Total sales by customer segment
+SELECT Segment, SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY Segment
+ORDER BY total_sales DESC;
+
+5. ORDER ANALYSIS 
+
+-- Count of orders by Ship Mode
+SELECT "Ship Mode", COUNT(*) AS order_count
+FROM superstore
+GROUP BY "Ship Mode"
+ORDER BY order_count DESC;
+
+-- Average sales amount per order
+SELECT AVG(Sales) AS avg_sales_per_order
+FROM superstore;
+
+-- Orders with sales greater than $1000
+SELECT *
+FROM superstore
+WHERE Sales > 1000
+ORDER BY Sales DESC;
+
+6. TIME SERIES ANALYSIS
+
+-- Monthly total sales
+SELECT DATE_TRUNC('month', "Order Date") AS order_month, SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY order_month
+ORDER BY order_month;
+
+-- Yearly sales growth
+SELECT DATE_TRUNC('year', "Order Date") AS order_year, SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY order_year
+ORDER BY order_year;
+
+7. INVENTORY ANALYSIS 
+
+-- Total sales by product category and sub-category
+SELECT Category, "Sub-Category", SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY Category, "Sub-Category"
+ORDER BY Category, total_sales DESC;
+
+-- Top 5 best-selling products
+SELECT "Product Name", SUM(Sales) AS total_sales
+FROM superstore
+GROUP BY "Product Name"
+ORDER BY total_sales DESC
+LIMIT 5;
+
+8. PROFIBILITY ANALYSIS
+
+-- Total profit by region
+SELECT Region, SUM(Profit) AS total_profit
+FROM superstore
+GROUP BY Region
+ORDER BY total_profit DESC;
+
+-- Top 5 most profitable products
+SELECT "Product Name", SUM(Profit) AS total_profit
+FROM superstore
+GROUP BY "Product Name"
+ORDER BY total_profit DESC
+LIMIT 5;
+
+-- Category-wise profitability analysis
+SELECT Category, "Sub-Category", SUM(Profit) AS total_profit
+FROM superstore
+GROUP BY Category, "Sub-Category"
+ORDER BY Category, total_profit DESC;
+
+9. COHORT ANALYSIS 
+
+-- Monthly cohort of customers based on their first order date
+WITH customer_first_order AS (
+    SELECT "Customer ID",
+           MIN(DATE_TRUNC('month', "Order Date")) AS first_order_month
+    FROM superstore
+    GROUP BY "Customer ID"
+)
+
+-- Join with main data to calculate monthly revenue per cohort
+SELECT c.first_order_month AS cohort_month,
+       DATE_TRUNC('month', s."Order Date") AS order_month,
+       SUM(s.Sales) AS cohort_sales
+FROM customer_first_order c
+JOIN superstore s
+ON c."Customer ID" = s."Customer ID"
+GROUP BY cohort_month, order_month
+ORDER BY cohort_month, order_month;
+
+10. TABLE CREATION 
+
+CREATE TABLE Superstore (
+    Row_ID INT PRIMARY KEY,
+    Order_ID VARCHAR(50) NOT NULL,
+    Order_Date DATE NOT NULL,
+    Ship_Date DATE NOT NULL,
+    Ship_Mode VARCHAR(50),
+    Customer_ID VARCHAR(50) NOT NULL,
+    Customer_Name VARCHAR(100),
+    Segment VARCHAR(50),
+    Country VARCHAR(50) DEFAULT 'United States',  -- Assuming all records are from the United States
+    City VARCHAR(100),
+    State VARCHAR(100),
+    Postal_Code INT,
+    Region VARCHAR(50),
+    Product_ID VARCHAR(50) NOT NULL,
+    Category VARCHAR(50),
+    Sub_Category VARCHAR(50),
+    Product_Name VARCHAR(150),
+    Sales DECIMAL(10, 2) CHECK (Sales >= 0) NOT NULL,  -- Ensures no negative sales values
+    Profit DECIMAL(10, 2) CHECK (Profit >= -10000),    -- Adjust for business logic as needed
+    Quantity INT CHECK (Quantity > 0),                 -- Positive quantities only
+    Discount DECIMAL(3, 2) CHECK (Discount BETWEEN 0 AND 1) -- Discount percentage from 0% to 100%
+);
